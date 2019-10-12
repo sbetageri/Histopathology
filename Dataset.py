@@ -1,3 +1,5 @@
+import numpy as np
+
 from torch.utils.data import Dataset
 from PIL import Image
 from torchvision import transforms
@@ -31,7 +33,7 @@ class HistoDataset(Dataset):
 
     def __getitem__(self, item):
         img_id = self.df.iloc[item]['id']
-        label = self.df.iloc[item]['label']
+        label = float(self.df.iloc[item]['label'])
 
         img_path = self.img_dir + img_id + '.tif'
         img = Image.open(img_path)
