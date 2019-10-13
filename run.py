@@ -27,7 +27,7 @@ def train_model(model, train_data, val_data, optimizer,
             loss.backward()
             optimizer.step()
             running_loss += loss.item()
-            predictions = torch.ceil(output.detach())
+            predictions = torch.ceil(output.cpu().detach())
             running_acc += accuracy_score(label, predictions)
 
         print('Avg Loss : ', running_loss / (len(train_data) * train_data.batch_size))
@@ -43,7 +43,7 @@ def train_model(model, train_data, val_data, optimizer,
                 label = label.to(device)
                 output = model(img)
                 loss = loss_fn(output, label)
-                predictions = torch.ceil(output.detach())
+                predictions = torch.ceil(output.cpu().detach())
                 running_acc += accuracy_score(label, predictions)
                 running_loss += loss.item()
         print('Avg Loss : ', running_loss / (len(val_data) * val_data.batch_size))
