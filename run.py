@@ -8,46 +8,62 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from Dataset import HistoDataset
 from tqdm import tqdm
+from torch.utils.tensorboard import SummaryWriter
 
 def train_model(model, train_data, val_data, optimizer,
-                epochs, loss_fn, device):
+                epochs, loss_fn, device, writer):
     for e in range(epochs):
         print('Training Iteration : ', e + 1)
         running_loss = 0
         running_acc = 0
         model = model.to(device)
         model.train()
-        for img, label in tqdm(train_data):
+        for i, (img, label) in tqdm(enumerate(train_data)):
             img = img.to(device)
             label = label.view(label.size(0), 1)
             label = label.to(device)
+
             optimizer.zero_grad()
+
             output = model(img)
             loss = loss_fn(output, label)
+
             loss.backward()
             optimizer.step()
-            running_loss += loss.item()
-            predictions = torch.ceil(output.cpu().detach())
-            running_acc += accuracy_score(label, predictions)
 
-        print('Avg Loss : ', running_loss / (len(train_data) * train_data.batch_size))
-        print('Avg Acc: ', running_acc / (len(train_data) * train_data.batch_size))
+            running_loss += loss.item()
+            predictions = torch.round(output)
+            running_acc += (predictions == label).sum().item() / 4
+            if (i % 1000) == 999:
+                writer.add_scalar('Train loss', running_loss / 1000)
+                writer.add_scalar('Train Acc', running_loss / 1000)
+
+                running_loss = 0
+                running_acc = 0
 
         with torch.no_grad():
             print('Validation Iteration : ', e + 1)
             model.eval()
             running_loss = 0
-            for img, label in tqdm(val_data):
+            running_acc = 0
+            for i, (img, label) in tqdm(enumerate(val_data)):
                 img = img.to(device)
                 label = label.view(label.size(0), 1)
                 label = label.to(device)
+
                 output = model(img)
                 loss = loss_fn(output, label)
-                predictions = torch.ceil(output.cpu().detach())
-                running_acc += accuracy_score(label, predictions)
                 running_loss += loss.item()
-        print('Avg Loss : ', running_loss / (len(val_data) * val_data.batch_size))
-        print('Avg Acc: ', running_acc / (len(train_data) * train_data.batch_size))
+
+                predictions = torch.round(output)
+                running_acc += (predictions == label).sum().item() / 4
+
+                if (i % 1000) == 999:
+                    writer.add_scalar('Val loss', running_loss / 1000)
+                    writer.add_scalar('Val Acc', running_loss / 1000)
+
+                    running_loss = 0
+                    running_acc = 0
     return model
 
 def predict(model, test_data, device):
@@ -65,6 +81,9 @@ def predict(model, test_data, device):
 
 
 if __name__ == '__main__':
+
+    writer = SummaryWriter('runs/histo_run_1')
+
     df = pd.read_csv(data.train_csv)
     train_df, val_df = train_test_split(df, test_size=0.15)
     train_dataset = HistoDataset(train_df, data.train_dir)
@@ -78,12 +97,15 @@ if __name__ == '__main__':
 
     model = AlexNet.AlexNet()
 
-    optimizer = torch.optim.Adadelta(model.parameters())
+    img, label = next(iter(train_loader))
+    writer.add_graph(model, img)
+
+    optimizer = torch.optim.Adam(model.parameters())
     loss_fn = torch.nn.BCEWithLogitsLoss()
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    model = train_model(model, train_loader, val_loader, optimizer, 2, loss_fn, device)
+    model = train_model(model, train_loader, val_loader, optimizer, 20, loss_fn, device, writer)
 
     torch.save(model.state_dict(), 'models/model.pt')
 
