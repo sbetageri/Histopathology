@@ -5,12 +5,11 @@ import pandas as pd
 from models import AlexNet
 from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
 from Dataset import HistoDataset
 from tqdm import tqdm
 from torch.utils.tensorboard import SummaryWriter
 
-def train_model(model, train_data, val_data, optimizer,
+def train_model(model, train_data, val_data, optimizer, scheduler,
                 epochs, loss_fn, device, writer):
     for e in range(epochs):
         print('Training Iteration : ', e + 1)
@@ -41,6 +40,7 @@ def train_model(model, train_data, val_data, optimizer,
                 running_loss = 0
                 running_acc = 0
 
+        val_loss = 0
         with torch.no_grad():
             print('Validation Iteration : ', e + 1)
             model.eval()
@@ -54,6 +54,7 @@ def train_model(model, train_data, val_data, optimizer,
                 output = model(img)
                 loss = loss_fn(output, label)
                 running_loss += loss.item()
+                val_loss += loss.item()
 
                 predictions = torch.round(output)
                 running_acc += (predictions == label).sum().item() / 4
@@ -64,6 +65,8 @@ def train_model(model, train_data, val_data, optimizer,
 
                     running_loss = 0
                     running_acc = 0
+        val_loss /= (len(val_data) * val_data.batch_size)
+        scheduler.step(val_loss)
     return model
 
 def predict(model, test_data, device):
@@ -101,11 +104,12 @@ if __name__ == '__main__':
     writer.add_graph(model, img)
 
     optimizer = torch.optim.Adam(model.parameters())
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=2, verbose=True)
     loss_fn = torch.nn.BCEWithLogitsLoss()
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    model = train_model(model, train_loader, val_loader, optimizer, 20, loss_fn, device, writer)
+    model = train_model(model, train_loader, val_loader, optimizer, scheduler, 20, loss_fn, device, writer)
 
     torch.save(model.state_dict(), 'models/model.pt')
 
