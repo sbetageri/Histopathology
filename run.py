@@ -31,7 +31,7 @@ def train_model(model, train_data, val_data, optimizer, scheduler,
             optimizer.step()
 
             running_loss += loss.item()
-            predictions = torch.round(output)
+            predictions = torch.round(torch.sigmoid(output))
             # print('Prediction : ', predictions)
             # print('Label : ', label)
             # print('Accuracy : ', (predictions == label).sum().item())
@@ -61,7 +61,7 @@ def train_model(model, train_data, val_data, optimizer, scheduler,
                 running_loss += loss.item()
                 val_loss += loss.item()
 
-                predictions = torch.round(output)
+                predictions = torch.round(torch.sigmoid(output))
                 running_acc += (predictions == label).sum().item()
 
                 if (i % 1000) == 999:
