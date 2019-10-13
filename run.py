@@ -41,7 +41,6 @@ def train_model(model, train_data, val_data, optimizer, scheduler,
                 writer.add_scalar('Train loss', running_loss / (1000 * train_data.batch_size))
                 writer.add_scalar('Train Acc', running_acc / (1000 * train_data.batch_size))
 
-                print('Running Acc : ', running_acc)
 
                 running_loss = 0
                 running_acc = 0
