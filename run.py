@@ -36,7 +36,7 @@ def train_model(model, train_data, val_data, optimizer,
             running_acc += (predictions == label).sum().item() / 4
             if (i % 1000) == 999:
                 writer.add_scalar('Train loss', running_loss / 1000)
-                writer.add_scalar('Train Acc', running_loss / 1000)
+                writer.add_scalar('Train Acc', running_acc / 1000)
 
                 running_loss = 0
                 running_acc = 0
@@ -60,7 +60,7 @@ def train_model(model, train_data, val_data, optimizer,
 
                 if (i % 1000) == 999:
                     writer.add_scalar('Val loss', running_loss / 1000)
-                    writer.add_scalar('Val Acc', running_loss / 1000)
+                    writer.add_scalar('Val Acc', running_acc / 1000)
 
                     running_loss = 0
                     running_acc = 0
