@@ -32,10 +32,16 @@ def train_model(model, train_data, val_data, optimizer, scheduler,
 
             running_loss += loss.item()
             predictions = torch.round(output)
-            running_acc += (predictions == label).sum().item() / 4
+            # print('Prediction : ', predictions)
+            # print('Label : ', label)
+            # print('Accuracy : ', (predictions == label).sum().item())
+            # assert False
+            running_acc += (predictions == label).sum().item()
             if (i % 1000) == 999:
-                writer.add_scalar('Train loss', running_loss / 1000)
-                writer.add_scalar('Train Acc', running_acc / 1000)
+                writer.add_scalar('Train loss', running_loss / (1000 * train_data.batch_size))
+                writer.add_scalar('Train Acc', running_acc / (1000 * train_data.batch_size))
+
+                print('Running Acc : ', running_acc)
 
                 running_loss = 0
                 running_acc = 0
@@ -57,11 +63,11 @@ def train_model(model, train_data, val_data, optimizer, scheduler,
                 val_loss += loss.item()
 
                 predictions = torch.round(output)
-                running_acc += (predictions == label).sum().item() / 4
+                running_acc += (predictions == label).sum().item()
 
                 if (i % 1000) == 999:
-                    writer.add_scalar('Val loss', running_loss / 1000)
-                    writer.add_scalar('Val Acc', running_acc / 1000)
+                    writer.add_scalar('Val loss', running_loss / (1000 * val_data.batch_size))
+                    writer.add_scalar('Val Acc', running_acc / (1000 * val_data.batch_size))
 
                     running_loss = 0
                     running_acc = 0
