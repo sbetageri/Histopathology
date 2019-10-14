@@ -11,6 +11,8 @@ from torch.utils.tensorboard import SummaryWriter
 
 def train_model(model, train_data, val_data, optimizer, scheduler,
                 epochs, loss_fn, device, writer):
+
+    epoch_val_loss = []
     for e in range(epochs):
         print('Training Iteration : ', e + 1)
         running_loss = 0
@@ -72,7 +74,18 @@ def train_model(model, train_data, val_data, optimizer, scheduler,
                     running_acc = 0
         val_loss /= (len(val_data) * val_data.batch_size)
         scheduler.step(val_loss)
+        if len(epoch_val_loss) > 1 and within_epsilon(val_loss, epoch_val_loss[-1], 100):
+            print('Early Stopping')
+            return model
+        else:
+            epoch_val_loss.append(val_loss)
     return model
+
+def within_epsilon(a, b, epsilon):
+    diff = abs(a - b)
+    if diff <= epsilon:
+        return True
+    return False
 
 def predict(model, test_data, device):
     outputs = []
@@ -90,7 +103,7 @@ def predict(model, test_data, device):
 
 if __name__ == '__main__':
 
-    writer = SummaryWriter('runs/histo_run_AlexNet_x0.5')
+    writer = SummaryWriter('runs/histo_run_AlexNet_x0.5_selu')
 
     df = pd.read_csv(data.train_csv)
     train_df, val_df = train_test_split(df, test_size=0.15)
