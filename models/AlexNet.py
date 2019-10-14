@@ -18,18 +18,18 @@ class AlexNet(nn.Module):
         self.dropout = nn.Dropout(0.45)
 
     def forward(self, x):
-        x = F.relu(self.conv1(x))
+        x = F.selu(self.conv1(x))
         x = self.max_pool(x)
-        x = F.relu(self.conv2(x))
+        x = F.selu(self.conv2(x))
         x = self.max_pool(x)
-        x = F.relu(self.conv3(x))
-        x = F.relu(self.conv4(x))
-        x = F.relu(self.conv5(x))
+        x = F.selu(self.conv3(x))
+        x = F.selu(self.conv4(x))
+        x = F.selu(self.conv5(x))
         x = self.max_pool(x)
 
         x = x.view((x.size(0), -1))
 
-        x = F.relu(self.linear1(x))
+        x = F.selu(self.linear1(x))
         x = self.dropout(x)
         x = self.linear2(x)
 
