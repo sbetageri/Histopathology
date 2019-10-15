@@ -76,8 +76,8 @@ def train_model(model, train_data, val_data, optimizer, scheduler,
         val_loss /= (len(val_data) * val_data.batch_size)
         scheduler.step(val_loss)
         if (len(epoch_val_loss) > 2 and
-                within_epsilon(val_loss, epoch_val_loss[-1], 100) and
-                within_epsilon(epoch_val_loss[-1], epoch_val_loss[-2])):
+                within_epsilon(val_loss, epoch_val_loss[-1], 1e-2) and
+                within_epsilon(epoch_val_loss[-1], epoch_val_loss[-2], 1e-2)):
             print('Early Stopping')
             return model
         else:
