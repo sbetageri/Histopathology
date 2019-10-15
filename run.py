@@ -4,6 +4,7 @@ import pandas as pd
 
 from models import AlexNet
 from models import ResNet
+from models import ResidualBlocks
 from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
 from Dataset import HistoDataset
@@ -105,7 +106,7 @@ def predict(model, test_data, device):
 
 if __name__ == '__main__':
 
-    writer = SummaryWriter('runs/histo_run_ResNet_lr0.1')
+    writer = SummaryWriter('runs/histo_run_ResNet_lr_1e-4')
 
     df = pd.read_csv(data.train_csv)
     train_df, val_df = train_test_split(df, test_size=0.15)
@@ -118,12 +119,12 @@ if __name__ == '__main__':
     train_loader = DataLoader(train_dataset, batch_size=4)
     val_loader = DataLoader(val_dataset, batch_size=4)
 
-    model = ResNet.ResNet()
+    model = ResNet.ResNet(block=ResidualBlocks.PreAct_ResBlock)
 
     img, label = next(iter(train_loader))
     writer.add_graph(model, img)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.1)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=2, verbose=True)
     loss_fn = torch.nn.BCEWithLogitsLoss()
 
