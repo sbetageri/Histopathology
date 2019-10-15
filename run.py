@@ -111,7 +111,7 @@ if __name__ == '__main__':
     df = pd.read_csv(data.train_csv)
     train_df, val_df = train_test_split(df, test_size=0.15)
     train_dataset = HistoDataset(train_df, data.train_dir)
-    val_dataset = HistoDataset(train_df, data.train_dir)
+    val_dataset = HistoDataset(val_df, data.train_dir)
 
     test_df = pd.read_csv(data.test_csv)
     test_dataset = HistoDataset(test_df, data.test_dir, flag=HistoDataset.TEST_SET)
