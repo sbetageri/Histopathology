@@ -41,8 +41,8 @@ def train_model(model, train_data, val_data, optimizer, scheduler,
             # assert False
             running_acc += (predictions == label).sum().item()
             if (i % 1000) == 999:
-                writer.add_scalar('Train loss', running_loss / (1000 * train_data.batch_size))
-                writer.add_scalar('Train Acc', running_acc / (1000 * train_data.batch_size))
+                writer.add_scalar('Loss/Train', running_loss / (1000 * train_data.batch_size))
+                writer.add_scalar('Acc/Train', running_acc / (1000 * train_data.batch_size))
 
 
                 running_loss = 0
@@ -68,8 +68,8 @@ def train_model(model, train_data, val_data, optimizer, scheduler,
                 running_acc += (predictions == label).sum().item()
 
                 if (i % 1000) == 999:
-                    writer.add_scalar('Val loss', running_loss / (1000 * val_data.batch_size))
-                    writer.add_scalar('Val Acc', running_acc / (1000 * val_data.batch_size))
+                    writer.add_scalar('Loss/Val', running_loss / (1000 * val_data.batch_size))
+                    writer.add_scalar('Acc/Val', running_acc / (1000 * val_data.batch_size))
 
                     running_loss = 0
                     running_acc = 0
