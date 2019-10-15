@@ -105,7 +105,7 @@ def predict(model, test_data, device):
 
 if __name__ == '__main__':
 
-    writer = SummaryWriter('runs/histo_run_ResNet')
+    writer = SummaryWriter('runs/histo_run_ResNet_lr0.1')
 
     df = pd.read_csv(data.train_csv)
     train_df, val_df = train_test_split(df, test_size=0.15)
