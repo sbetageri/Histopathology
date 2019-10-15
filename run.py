@@ -74,7 +74,9 @@ def train_model(model, train_data, val_data, optimizer, scheduler,
                     running_acc = 0
         val_loss /= (len(val_data) * val_data.batch_size)
         scheduler.step(val_loss)
-        if len(epoch_val_loss) > 1 and within_epsilon(val_loss, epoch_val_loss[-1], 100):
+        if (len(epoch_val_loss) > 2 and
+                within_epsilon(val_loss, epoch_val_loss[-1], 100) and
+                within_epsilon(epoch_val_loss[-1], epoch_val_loss[-2])):
             print('Early Stopping')
             return model
         else:
@@ -121,7 +123,7 @@ if __name__ == '__main__':
     img, label = next(iter(train_loader))
     writer.add_graph(model, img)
 
-    optimizer = torch.optim.Adam(model.parameters())
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.1)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=2, verbose=True)
     loss_fn = torch.nn.BCEWithLogitsLoss()
 
