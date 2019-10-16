@@ -106,7 +106,7 @@ def predict(model, test_data, device):
 
 if __name__ == '__main__':
 
-    writer = SummaryWriter('runs/histo_run_ResNet_norm_lr_1e-4')
+    writer = SummaryWriter('runs/histo_run_AlexNet_lr_1e-4')
 
     df = pd.read_csv(data.train_csv)
     train_df, val_df = train_test_split(df, test_size=0.15)
@@ -119,7 +119,7 @@ if __name__ == '__main__':
     train_loader = DataLoader(train_dataset, batch_size=4)
     val_loader = DataLoader(val_dataset, batch_size=4)
 
-    model = ResNet.ResNet(block=ResidualBlocks.ResBlock)
+    model = AlexNet.AlexNet()
 
     img, label = next(iter(train_loader))
     writer.add_graph(model, img)
@@ -132,7 +132,7 @@ if __name__ == '__main__':
 
     model = train_model(model, train_loader, val_loader, optimizer, scheduler, 20, loss_fn, device, writer)
 
-    torch.save(model.state_dict(), 'models/ResNet_Norm.pt')
+    torch.save(model.state_dict(), 'models/AlexNet.pt')
 
     predictions = predict(model, test_dataset, device)
 
