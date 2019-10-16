@@ -76,8 +76,8 @@ def train_model(model, train_data, val_data, optimizer, scheduler,
         val_loss /= (len(val_data) * val_data.batch_size)
         scheduler.step(val_loss)
         if (len(epoch_val_loss) > 2 and
-                within_epsilon(val_loss, epoch_val_loss[-1], 1e-2) and
-                within_epsilon(epoch_val_loss[-1], epoch_val_loss[-2], 1e-2)):
+                within_epsilon(val_loss, epoch_val_loss[-1], 1e-3) and
+                within_epsilon(epoch_val_loss[-1], epoch_val_loss[-2], 1e-3)):
             print('Early Stopping')
             return model
         else:
@@ -106,7 +106,7 @@ def predict(model, test_data, device):
 
 if __name__ == '__main__':
 
-    writer = SummaryWriter('runs/histo_run_ResNet_lr_1e-4')
+    writer = SummaryWriter('runs/histo_run_ResNet_norm_lr_1e-4')
 
     df = pd.read_csv(data.train_csv)
     train_df, val_df = train_test_split(df, test_size=0.15)
@@ -119,7 +119,7 @@ if __name__ == '__main__':
     train_loader = DataLoader(train_dataset, batch_size=4)
     val_loader = DataLoader(val_dataset, batch_size=4)
 
-    model = ResNet.ResNet(block=ResidualBlocks.PreAct_ResBlock)
+    model = ResNet.ResNet(block=ResidualBlocks.ResBlock)
 
     img, label = next(iter(train_loader))
     writer.add_graph(model, img)
@@ -132,7 +132,7 @@ if __name__ == '__main__':
 
     model = train_model(model, train_loader, val_loader, optimizer, scheduler, 20, loss_fn, device, writer)
 
-    torch.save(model.state_dict(), 'models/ResNet.pt')
+    torch.save(model.state_dict(), 'models/ResNet_Norm.pt')
 
     predictions = predict(model, test_dataset, device)
 
